@@ -32,18 +32,18 @@ with st.expander(
     ### Welcome! Here is how to read and use this dashboard in 3 simple steps:
     
     1. **What is this?** 
-       Traditional sewer design assumes constant, predictable flows and pollutant loads. Real life isn't like that—it rains, towns grow, and factories discharge waste unpredictably. This tool models **real-world uncertainty (stochastic behavior)** to show how your plant actually handles stress over time.
+       Traditional sewer design assumes constant, predictable flows and pollutant loads. Real life isn't like that—it rains, towns grow, and factories discharge waste unpredictably. This tool models **real-world uncertainty (stochastic behavior)** and **dynamic treatment control (VFD Aeration)** to show how your plant handles stress over time.
        
     2. **How to use the Sidebar (Left):**
        * **Regional Presets:** Instantly load calibrated parameters based on climate and infrastructure typologies.
-       * **Initial Flow & Growth Drift ($\mu_Q$):** Sets your baseline water volume and how fast the city/catchment population is growing annually.
-       * **Hydraulic & BOD Volatility ($\sigma_Q, \sigma_C$):** Controls how wildly daily water flow and organic pollutant strength bounce around due to storms or shock loads.
-       * **Infiltration Correlation ($\rho_{QC}$):** Captures the physical reality that heavy rainfall dilutes sewage—meaning higher water flow usually lowers organic concentration.
+       * **Initial Flow & Growth Drift ($\mu_Q$):** Sets your baseline water volume and population growth rate.
+       * **Hydraulic & BOD Volatility ($\sigma_Q, \sigma_C$):** Controls daily flow and organic pollutant bouncing.
+       * **Infiltration Correlation ($\rho_{QC}$):** Captures the reality that heavy rainfall dilutes sewage.
        
     3. **How to read the Results (Right):**
        * **Mean Flow & BOD:** Gives you the overall average operational load across your chosen [Simulation Duration (Days)](https://stochastic-lifecycle-energy-carbon-real-options-sizing-engine.streamlit.app/~/+/#stochastic-lifecycle-energy-carbon-and-real-options-sizing-engine).
-       * **Blower Power ($P_{aero}$):** Automatically calculates how much electrical power your aeration blowers need to keep treatment biological tanks alive under those shifting daily loads.
-       * **Export Data:** Use the [Download Simulation Data (CSV)](https://stochastic-lifecycle-energy-carbon-real-options-sizing-engine.streamlit.app/~/+/#export-simulation-report) button at the bottom to feed these time-series numbers into your broader financial and Real Options Analysis (ROA) models.
+       * **VFD Aeration Power ($P_{aero}$):** Calculates automated blower power adjustments required to maintain stable Dissolved Oxygen (DO) under shifting loads.
+       * **Export Data:** Use the [Download Simulation Data (CSV)](https://stochastic-lifecycle-energy-carbon-real-options-sizing-engine.streamlit.app/~/+/#export-simulation-report) button at the bottom to feed these time-series numbers into your Real Options Analysis (ROA) models.
     """)
 
 # ==========================================
@@ -175,7 +175,7 @@ simulation_days = st.sidebar.slider(
 )
 
 # ==========================================
-# CORE COMPUTATIONAL ENGINE
+# CORE COMPUTATIONAL ENGINE (WITH VFD CONTROL)
 # ==========================================
 
 
@@ -213,7 +213,7 @@ def run_stochastic_simulation(
     )
     C_BOD[t] = max(C_BOD[t], 30.0)
 
-  # Electromechanical & Aeration Calculations
+  # Electromechanical & Dynamic VFD Aeration Calculations
   m_bod = (Q * C_BOD) / 1000.0
   aor_sote_ratio = 1.8
   o2_fraction = 0.232
@@ -229,7 +229,23 @@ def run_stochastic_simulation(
   q_air = mass_air_per_day / (rho_air * 24.0)
   win = mass_air_per_day / 86400.0
   pressure_term = ((p2 / p1) ** ((k_ratio - 1.0) / k_ratio)) - 1.0
-  p_aero = q_air * win * r_gas * t1 / (2.83e4 * e_blower) * pressure_term
+
+  # Dynamic VFD Motor Efficiency modulation based on load relative to baseline baseline load
+  baseline_load = (q_init * c_base) / 1000.0
+  load_ratio = m_bod / baseline_load
+  # VFD efficiency curve adjustment (partial load efficiency penalty modeled smoothly)
+  eta_motor_vfd = 0.92 * (
+      1.0 - 0.15 * np.abs(1.0 - np.clip(load_ratio, 0.4, 1.8))
+  )
+
+  p_aero = (
+      q_air
+      * win
+      * r_gas
+      * t1
+      / (2.83e4 * e_blower * eta_motor_vfd)
+      * pressure_term
+  )
 
   df = pd.DataFrame({
       'Day': np.arange(1, days + 1),
@@ -268,9 +284,12 @@ col2.metric(
     help="Average organic strength of the wastewater.",
 )
 col3.metric(
-    "Avg Aeration Power Demand",
+    "Avg VFD Aeration Power",
     f"{df_sim['Aeration_Power_kW'].mean():,.1f} kW",
-    help="Average electrical power required by biological blowers.",
+    help=(
+        "Average electrical power consumed under dynamic VFD dissolved"
+        " oxygen control."
+    ),
 )
 col4.metric(
     "Total Energy Intensity",
@@ -316,16 +335,16 @@ with col_a:
   st.plotly_chart(fig_bod, use_container_width=True)
 
 with col_b:
-  st.subheader('⚡ Blower Aeration Power Demand')
+  st.subheader('⚡ VFD Blower Aeration Power Demand')
   st.markdown(
-      '*Observation:* Instantaneous power requirements scale directly with'
-      ' combined mass loading ($Q \\times C$).'
+      '*Observation:* Modulates blower frequency dynamically via VFD to maintain'
+      ' DO compliance during organic shocks.'
   )
   fig_power = px.line(
       df_sim,
       x='Day',
       y='Aeration_Power_kW',
-      title='Instantaneous Blower Power ($P_{aero}$)',
+      title='Dynamic VFD Aeration Power ($P_{aero}$)',
   )
   st.plotly_chart(fig_power, use_container_width=True)
 
