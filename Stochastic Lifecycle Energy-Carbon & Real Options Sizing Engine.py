@@ -16,8 +16,34 @@ st.title(
     "🌊 Stochastic Lifecycle Energy-Carbon & Real Options Sizing Engine"
 )
 st.markdown(
-    "*Interactive Decision-Support Tool based on Stochastic Infrastructure Lifecycle Optimization Framework.*"
+    "*Interactive Decision-Support Tool based on Stochastic Infrastructure"
+    " Lifecycle Optimization Framework.*"
 )
+
+# ==========================================
+# USER-FRIENDLY GUIDED EXPLAINER (NEW)
+# ==========================================
+with st.expander(
+    "💡 **New to this tool? Click here for a quick, simple guide on how it"
+    " works!**",
+    expanded=False,
+):
+  st.markdown("""
+    ### Welcome! Here is how to read and use this dashboard in 3 simple steps:
+    
+    1. **What is this?** 
+       Traditional sewer design assumes constant, predictable flows and pollutant loads. Real life isn't like that—it rains, towns grow, and factories discharge waste unpredictably. This tool models **real-world uncertainty (stochastic behavior)** to show how your plant actually handles stress over time.
+       
+    2. **How to use the Sidebar (Left):**
+       * **Initial Flow & Growth Drift ($\mu_Q$):** Sets your baseline water volume and how fast the city/catchment population is growing annually.
+       * **Hydraulic & BOD Volatility ($\sigma_Q, \sigma_C$):** Controls how wildly daily water flow and organic pollutant strength bounce around due to storms or shock loads.
+       * **Infiltration Correlation ($\rho_{QC}$):** Captures the physical reality that heavy rainfall dilutes sewage—meaning higher water flow usually lowers organic concentration.
+       
+    3. **How to read the Results (Right):**
+       * **Mean Flow & BOD:** Gives you the overall average operational load across your chosen [Simulation Duration (Days)](https://stochastic-lifecycle-energy-carbon-real-options-sizing-engine.streamlit.app/~/+/#stochastic-lifecycle-energy-carbon-and-real-options-sizing-engine).
+       * **Blower Power ($P_{aero}$):** Automatically calculates how much electrical power your aeration blowers need to keep treatment biological tanks alive under those shifting daily loads.
+       * **Export Data:** Use the [Download Simulation Data (CSV)](https://stochastic-lifecycle-energy-carbon-real-options-sizing-engine.streamlit.app/~/+/#export-simulation-report) button at the bottom to feed these time-series numbers into your broader financial and Real Options Analysis (ROA) models.
+    """)
 
 # ==========================================
 # SIDEBAR: USER INPUT PARAMETERS
@@ -31,12 +57,26 @@ q_initial = st.sidebar.number_input(
     max_value=100000.0,
     value=25000.0,
     step=1000.0,
+    help=(
+        "Baseline daily average wastewater flow derived from initial design"
+        " parameters."
+    ),
 )
 mu_q = st.sidebar.slider(
-    "Flow Annual Growth Drift (μ_Q)", 0.0, 0.1, 0.03, 0.005
+    "Flow Annual Growth Drift (μ_Q)",
+    0.0,
+    0.1,
+    0.03,
+    0.005,
+    help="Long-term upward trend representing regional population growth.",
 )
 sigma_q = st.sidebar.slider(
-    "Hydraulic Volatility (σ_Q)", 0.05, 0.30, 0.12, 0.01
+    "Hydraulic Volatility (σ_Q)",
+    0.05,
+    0.30,
+    0.12,
+    0.01,
+    help="Degree of daily flow unpredictability caused by weather and habits.",
 )
 
 c_baseline = st.sidebar.number_input(
@@ -45,16 +85,47 @@ c_baseline = st.sidebar.number_input(
     max_value=500.0,
     value=280.0,
     step=10.0,
+    help="Target long-term average organic strength of the wastewater.",
 )
-theta = st.sidebar.slider("Mean-Reversion Speed (θ)", 0.01, 0.50, 0.15, 0.01)
-sigma_c = st.sidebar.slider("BOD Volatility (σ_C)", 10.0, 100.0, 35.0, 5.0)
+theta = st.sidebar.slider(
+    "Mean-Reversion Speed (θ)",
+    0.01,
+    0.50,
+    0.15,
+    0.01,
+    help=(
+        "How fast organic concentrations recover back to baseline after a"
+        " sudden shock."
+    ),
+)
+sigma_c = st.sidebar.slider(
+    "BOD Volatility (σ_C)",
+    10.0,
+    100.0,
+    35.0,
+    5.0,
+    help="Magnitude of random daily fluctuations around the BOD mean.",
+)
 rho_qc = st.sidebar.slider(
-    "Infiltration Correlation (ρ_QC)", -0.9, 0.0, -0.45, 0.05
+    "Infiltration Correlation (ρ_QC)",
+    -0.9,
+    0.0,
+    -0.45,
+    0.05,
+    help=(
+        "Coupling effect: rainstorms increase flow while diluting pollutant"
+        " concentration."
+    ),
 )
 
 st.sidebar.subheader("Simulation Horizon")
 simulation_days = st.sidebar.slider(
-    "Simulation Duration (Days)", 90, 365, 365, 30
+    "Simulation Duration (Days)",
+    90,
+    365,
+    365,
+    30,
+    help="Total time-horizon length to project operations.",
 )
 
 # ==========================================
@@ -70,7 +141,6 @@ def run_stochastic_simulation(
   dt_year = 1.0 / 365.0
   dt_day = 1.0
 
-  # Cholesky decomposition for correlated noise
   cov_matrix = [[1.0, rho_qc], [rho_qc, 1.0]]
   l_chol = np.linalg.cholesky(cov_matrix)
 
@@ -126,7 +196,6 @@ def run_stochastic_simulation(
   return df
 
 
-# Execute simulation with user parameters
 df_sim = run_stochastic_simulation(
     simulation_days,
     q_initial,
@@ -145,17 +214,22 @@ col1, col2, col3, col4 = st.columns(4)
 col1.metric(
     "Mean Daily Flow",
     f"{df_sim['Hydraulic_Flow_m3_day'].mean():,.0f} m³/day",
+    help="Average daily volume of wastewater entering the plant.",
 )
 col2.metric(
     "Mean BOD Concentration",
     f"{df_sim['BOD_Concentration_mg_L'].mean():.1f} mg/L",
+    help="Average organic strength of the wastewater.",
 )
 col3.metric(
-    "Avg Aeration Power Demand", f"{df_sim['Aeration_Power_kW'].mean():,.1f} kW"
+    "Avg Aeration Power Demand",
+    f"{df_sim['Aeration_Power_kW'].mean():,.1f} kW",
+    help="Average electrical power required by biological blowers.",
 )
 col4.metric(
     "Total Energy Intensity",
     f"{(df_sim['Aeration_Power_kW'].sum() * 24) / 1000:,.1f} MWh/yr",
+    help="Cumulative yearly energy consumption derived from daily load stress.",
 )
 
 st.markdown('---')
@@ -165,6 +239,10 @@ st.markdown('---')
 # ==========================================
 st.subheader(
     '📈 Dynamic Hydraulic Flow & Organic Loading (Infiltration Inflow Effects)'
+)
+st.markdown(
+    '*Observation:* Watch how the flow curve drifts upward with growth while'
+    ' absorbing daily storm shocks.'
 )
 fig_flow = px.line(
     df_sim,
@@ -179,6 +257,10 @@ col_a, col_b = st.columns(2)
 
 with col_a:
   st.subheader('🧪 BOD Concentration Profile')
+  st.markdown(
+      '*Observation:* Notice how high or low organic spikes always pull back'
+      ' toward the baseline average over time (Mean-Reversion).'
+  )
   fig_bod = px.line(
       df_sim,
       x='Day',
@@ -189,6 +271,10 @@ with col_a:
 
 with col_b:
   st.subheader('⚡ Blower Aeration Power Demand')
+  st.markdown(
+      '*Observation:* Instantaneous power requirements scale directly with'
+      ' combined mass loading ($Q \\times C$).'
+  )
   fig_power = px.line(
       df_sim,
       x='Day',
