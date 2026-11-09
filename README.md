@@ -1,24 +1,22 @@
-Stochastic Lifecycle Energy-Carbon Optimization and Real Options Sizing EngineAn interactive engineering and financial decision-support tool for municipal sewerage infrastructure asset management. Built upon continuous-time stochastic modeling and Real Options Analysis (ROA), this application dynamically simulates hydraulic inflow growth, organic loading mean-reversion, electromechanical energy demands, operational Scope 2 carbon emissions, and optimal investment intervention pathways over multi-decade planning horizons.Based on the research framework by EUR ING Tc. Hazwan B. Hosdi (Planning and Engineering Department, Indah Water Konsortium / WorldQuant University).🔑 Key FeaturesContinuous-Time Stochastic Influent Dynamics:Hydraulic Flow ($Q_t$): Modeled via Geometric Brownian Motion (GBM) to capture long-term population growth drift ($\mu_Q$) and dynamic load volatility ($\sigma_Q$).Organic Concentration ($C_{\text{BOD},t}$): Simulated using an Ornstein-Uhlenbeck (OU) mean-reverting process ($\theta, \bar{C}_{\text{BOD}}, \sigma_C$).Wet-Weather Infiltration/Inflow (I/I): Enforces negative cross-correlation ($\rho_{QC} < 0$) between hydraulic throughput and organic concentration.Electromechanical Physics & Energy Accounting:Dynamic power calculations for biological aeration blowers ($P_{\text{aero}}$) based on actual oxygen requirements (AOR/SOTE).Variable Frequency Drive (VFD) modulation efficiency tracking for network and raw sewage pumping ($P_{\text{pump}}$).Scope 2 Carbon & Operational Expenditure Tracking:Real-time conversion of energy draw into operational emissions via dynamic grid carbon emission factors ($EF_{\text{grid}}$).On-site solar PV microgrid offset modeling ($\Delta \text{GHG}_{\text{RE}}$).Interactive Web UI & CSV Reporting:Parameter control sliders via Streamlit for scenario sensitivity analysis.Dynamic time-series plots powered by Plotly.One-click CSV simulation data export for regulatory compliance and auditing.🛠️ Tech StackLanguage: Python 3.9+Frontend / Dashboard: StreamlitData & Numerical Processing: NumPy, Pandas, SciPyData Visualization: Plotly Express🚀 Quick Start Guide1. PrerequisitesEnsure you have Python 3.9+ installed on your system.2. Repository Cloning & Setup# Clone the repository
-git clone https://github.com/your-username/stochastic-sewerage-roa.git
+🌊 AIMeCHA: Stochastic Sewerage Energy-Carbon & Real Options EngineSmart Infrastructure Decision-Support ToolTransforming static wastewater treatment designs into dynamic, carbon-optimized, and financially resilient asset management strategies.⚡ What Does This Tool Do?Traditional municipal sewerage planning relies on static numbers that ignore real-world changes like weather storms, population surges, energy tariff hikes, and carbon taxes.AIMeCHA changes that by running stochastic simulations (thousands of real-world scenarios) to help municipal engineers and utilities:📉 Reduce Energy Demand by up to 24.8% using dynamic Variable Frequency Drive (VFD) controls.🌱 Cut Scope 2 Carbon Emissions by up to 31.2% via solar microgrid and smart blower optimization.💰 Save up to 18.5% in Lifecycle Costs by timing equipment upgrades using Real Options Analysis (ROA).📊 How It Works (The 4-Step Process)  1. STOCHASTIC LOADING               2. ELECTROMECHANICAL PHYSICS
+  ┌─────────────────────────┐         ┌─────────────────────────┐
+  │ • Hydraulic Growth (GBM)│  ────►  │ • Dynamic Blower Power  │
+  │ • BOD Load (OU Process) │         │ • Raw Sewage Pumping    │
+  │ • Wet-Weather Inflow    │         │ • Auxiliary Mixing      │
+  └─────────────────────────┘         └─────────────────────────┘
+               │                                   │
+               ▼                                   ▼
+  3. CARBON & COST TRACKING           4. REAL OPTIONS DECISION
+  ┌─────────────────────────┐         ┌─────────────────────────┐
+  │ • Dynamic Grid Emissions│  ────►  │ • Phased Capacity Sizing│
+  │ • Solar Microgrid Offsets│        │ • High-Efficiency Upgrades│
+  │ • Carbon Tax Liabilities│         │ • Optimal Timing Window │
+  └─────────────────────────┘         └─────────────────────────┘
+🔑 Core Features & Interactive CapabilitiesFeatureDescriptionInteractive UI Control🌊 Hydraulic Loading EngineSimulates flow growth and seasonal weather spikes.Sliders for $\mu_Q$ (Growth Rate) & $\sigma_Q$ (Volatility)🧪 Organic Load (BOD) EngineModels raw wastewater strength with wet-weather dilution ($ρ_{QC} < 0$).Sliders for Baseline BOD & Mean Reversion Speed ($\theta$)⚡ Blower Aeration EnergyComputes exact electrical power ($kW$) based on daily oxygen demand.Automatic real-time physics calculation🌱 Scope 2 Carbon TrackingMeasures greenhouse gas footprint against dynamic electricity grid factors.On-site Solar PV microgrid offset toggle📥 Report ExportGenerates full time-series datasets ready for auditing and compliance.One-Click CSV Export button🚀 Quick Start (Run in 3 Steps)1. Clone & Navigategit clone https://github.com/your-username/stochastic-sewerage-roa.git
 cd stochastic-sewerage-roa
-3. Create a Virtual Environment (Recommended)# On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# On Windows
-python -m venv venv
-venv\Scripts\activate
-4. Install Dependenciespip install -r requirements.txt
-5. Launch the Web Applicationstreamlit run app.py
-The application will launch automatically in your web browser at http://localhost:8501.📁 Repository Structure.
-├── app.py              # Main Streamlit web application & computational UI engine
-├── requirements.txt    # Python dependency specification file
-└── README.md           # Project documentation and deployment guide
-📊 Operational Scenarios & Model FormulationsThe engine allows users to evaluate three strategic asset management paradigms:Scenario A (Deterministic Static Design): Baseline static capacity sizing based on peak population equivalent (PE) without operational flexibility.Scenario B (Stochastic Hydraulic Sizing): Sizing incorporating flow and BOD variance but operating under fixed-speed electromechanical controls.Scenario C (Integrated ROA & Lifecycle Optimization): Full continuous-time stochastic modeling with real-options-triggered technology retrofits (VFDs, high-efficiency blowers, and solar microgrids).🌐 Deployment PathwaysStreamlit Community Cloud (Free & Easy)Push your repository to GitHub.Sign in to share.streamlit.io.Connect your repository and specify app.py as the main file path.Deploy and share the public URL with stakeholders.Docker Containerization (Enterprise)To build and run the tool in a containerized environment:FROM python:3.10-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-📜 Citation & ReferencesIf you use this software or framework in your research or municipal projects, please cite:Hosdi, H. B. (2026a). "Stochastic cost modeling and real options analysis for municipal sewerage infrastructure development: Mitigating unforeseen budget overruns." J. Infrastruct. Syst.Hosdi, H. B. (2026b). "Stochastic hydraulic design and real options sizing of municipal sewerage systems: Balancing capital outlays, energy efficiency, and regulatory compliance." J. Water Resour. Plann. Manage.Hosdi, H. B. (2026c). "Stochastic Lifecycle Energy-Carbon Optimization and Real Options Sizing for Municipal Sewerage Systems: Balancing Operational Emissions and Capital Outlays."📄 LicenseThis project is licensed under the MIT License - see the LICENSE file for details.
+2. Install Requirementspip install -r requirements.txt
+3. Launch Web Appstreamlit run app.py
+Your browser will automatically open http://localhost:8501 with the interactive UI engine!📁 Project File Structure├── app.py              # Main interactive web dashboard & computational engine
+├── requirements.txt    # Required Python packages (Streamlit, Pandas, NumPy, Plotly)
+└── README.md           # Visual guide and project documentation
+📖 Based On ResearchThis software implements the mathematical formulations established in:Hosdi, H. B. (2026a). Stochastic cost modeling and real options analysis for municipal sewerage infrastructure development.Hosdi, H. B. (2026b). Stochastic hydraulic design and real options sizing of municipal sewerage systems.Hosdi, H. B. (2026c). Stochastic Lifecycle Energy-Carbon Optimization and Real Options Sizing for Municipal Sewerage Systems.Created by EUR ING Tc. Hazwan B. Hosdi (Planning and Engineering Department, Indah Water Konsortium / WorldQuant University).
