@@ -21,7 +21,7 @@ st.markdown(
 )
 
 # ==========================================
-# USER-FRIENDLY GUIDED EXPLAINER (NEW)
+# USER-FRIENDLY GUIDED EXPLAINER
 # ==========================================
 with st.expander(
     "💡 **New to this tool? Click here for a quick, simple guide on how it"
@@ -35,6 +35,7 @@ with st.expander(
        Traditional sewer design assumes constant, predictable flows and pollutant loads. Real life isn't like that—it rains, towns grow, and factories discharge waste unpredictably. This tool models **real-world uncertainty (stochastic behavior)** to show how your plant actually handles stress over time.
        
     2. **How to use the Sidebar (Left):**
+       * **Regional Presets:** Instantly load calibrated parameters based on climate and infrastructure typologies.
        * **Initial Flow & Growth Drift ($\mu_Q$):** Sets your baseline water volume and how fast the city/catchment population is growing annually.
        * **Hydraulic & BOD Volatility ($\sigma_Q, \sigma_C$):** Controls how wildly daily water flow and organic pollutant strength bounce around due to storms or shock loads.
        * **Infiltration Correlation ($\rho_{QC}$):** Captures the physical reality that heavy rainfall dilutes sewage—meaning higher water flow usually lowers organic concentration.
@@ -49,6 +50,48 @@ with st.expander(
 # SIDEBAR: USER INPUT PARAMETERS
 # ==========================================
 st.sidebar.header("🎛️ Simulation Parameters")
+
+# --- REGIONAL PRESETS SELECTOR ---
+st.sidebar.subheader("🌍 Regional Climate Presets")
+preset_option = st.sidebar.selectbox(
+    "Select Infrastructure Profile",
+    [
+        "Custom / Manual Tuning",
+        "Tropical Monsoon Catchment (e.g., Southeast Asia)",
+        "Arid / Separated Network (e.g., Middle East)",
+        "Mature Temperate Network (e.g., Central Europe)",
+    ],
+    help=(
+        "Automatically configure volatility, drift, and infiltration based on"
+        " regional climate and pipe integrity norms."
+    ),
+)
+
+# Set default values based on selected preset
+if preset_option == "Tropical Monsoon Catchment (e.g., Southeast Asia)":
+  default_mu_q = 0.035
+  default_sigma_q = 0.22
+  default_theta = 0.15
+  default_sigma_c = 45.0
+  default_rho_qc = -0.65
+elif preset_option == "Arid / Separated Network (e.g., Middle East)":
+  default_mu_q = 0.04
+  default_sigma_q = 0.08
+  default_theta = 0.20
+  default_sigma_c = 25.0
+  default_rho_qc = -0.15
+elif preset_option == "Mature Temperate Network (e.g., Central Europe)":
+  default_mu_q = 0.01
+  default_sigma_q = 0.10
+  default_theta = 0.12
+  default_sigma_c = 30.0
+  default_rho_qc = -0.30
+else:  # Custom
+  default_mu_q = 0.03
+  default_sigma_q = 0.12
+  default_theta = 0.15
+  default_sigma_c = 35.0
+  default_rho_qc = -0.45
 
 st.sidebar.subheader("Hydraulic & Organic Loading")
 q_initial = st.sidebar.number_input(
@@ -66,17 +109,20 @@ mu_q = st.sidebar.slider(
     "Flow Annual Growth Drift (μ_Q)",
     0.0,
     0.1,
-    0.03,
+    default_mu_q,
     0.005,
     help="Long-term upward trend representing regional population growth.",
 )
 sigma_q = st.sidebar.slider(
     "Hydraulic Volatility (σ_Q)",
     0.05,
-    0.30,
-    0.12,
+    0.35,
+    default_sigma_q,
     0.01,
-    help="Degree of daily flow unpredictability caused by weather and habits.",
+    help=(
+        "Degree of daily flow unpredictability caused by rainfall and storm"
+        " surges."
+    ),
 )
 
 c_baseline = st.sidebar.number_input(
@@ -91,7 +137,7 @@ theta = st.sidebar.slider(
     "Mean-Reversion Speed (θ)",
     0.01,
     0.50,
-    0.15,
+    default_theta,
     0.01,
     help=(
         "How fast organic concentrations recover back to baseline after a"
@@ -102,7 +148,7 @@ sigma_c = st.sidebar.slider(
     "BOD Volatility (σ_C)",
     10.0,
     100.0,
-    35.0,
+    default_sigma_c,
     5.0,
     help="Magnitude of random daily fluctuations around the BOD mean.",
 )
@@ -110,7 +156,7 @@ rho_qc = st.sidebar.slider(
     "Infiltration Correlation (ρ_QC)",
     -0.9,
     0.0,
-    -0.45,
+    default_rho_qc,
     0.05,
     help=(
         "Coupling effect: rainstorms increase flow while diluting pollutant"
