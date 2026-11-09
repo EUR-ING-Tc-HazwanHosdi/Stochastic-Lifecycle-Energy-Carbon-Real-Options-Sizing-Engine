@@ -1,2 +1,24 @@
-# Stochastic-Lifecycle-Energy-Carbon-Real-Options-Sizing-Engine
-Stochastic Lifecycle Energy-Carbon &amp; Real Options Sizing Engine
+Stochastic Lifecycle Energy-Carbon Optimization and Real Options Sizing EngineAn interactive engineering and financial decision-support tool for municipal sewerage infrastructure asset management. Built upon continuous-time stochastic modeling and Real Options Analysis (ROA), this application dynamically simulates hydraulic inflow growth, organic loading mean-reversion, electromechanical energy demands, operational Scope 2 carbon emissions, and optimal investment intervention pathways over multi-decade planning horizons.Based on the research framework by EUR ING Tc. Hazwan B. Hosdi (Planning and Engineering Department, Indah Water Konsortium / WorldQuant University).🔑 Key FeaturesContinuous-Time Stochastic Influent Dynamics:Hydraulic Flow ($Q_t$): Modeled via Geometric Brownian Motion (GBM) to capture long-term population growth drift ($\mu_Q$) and dynamic load volatility ($\sigma_Q$).Organic Concentration ($C_{\text{BOD},t}$): Simulated using an Ornstein-Uhlenbeck (OU) mean-reverting process ($\theta, \bar{C}_{\text{BOD}}, \sigma_C$).Wet-Weather Infiltration/Inflow (I/I): Enforces negative cross-correlation ($\rho_{QC} < 0$) between hydraulic throughput and organic concentration.Electromechanical Physics & Energy Accounting:Dynamic power calculations for biological aeration blowers ($P_{\text{aero}}$) based on actual oxygen requirements (AOR/SOTE).Variable Frequency Drive (VFD) modulation efficiency tracking for network and raw sewage pumping ($P_{\text{pump}}$).Scope 2 Carbon & Operational Expenditure Tracking:Real-time conversion of energy draw into operational emissions via dynamic grid carbon emission factors ($EF_{\text{grid}}$).On-site solar PV microgrid offset modeling ($\Delta \text{GHG}_{\text{RE}}$).Interactive Web UI & CSV Reporting:Parameter control sliders via Streamlit for scenario sensitivity analysis.Dynamic time-series plots powered by Plotly.One-click CSV simulation data export for regulatory compliance and auditing.🛠️ Tech StackLanguage: Python 3.9+Frontend / Dashboard: StreamlitData & Numerical Processing: NumPy, Pandas, SciPyData Visualization: Plotly Express🚀 Quick Start Guide1. PrerequisitesEnsure you have Python 3.9+ installed on your system.2. Repository Cloning & Setup# Clone the repository
+git clone https://github.com/your-username/stochastic-sewerage-roa.git
+cd stochastic-sewerage-roa
+3. Create a Virtual Environment (Recommended)# On macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+# On Windows
+python -m venv venv
+venv\Scripts\activate
+4. Install Dependenciespip install -r requirements.txt
+5. Launch the Web Applicationstreamlit run app.py
+The application will launch automatically in your web browser at http://localhost:8501.📁 Repository Structure.
+├── app.py              # Main Streamlit web application & computational UI engine
+├── requirements.txt    # Python dependency specification file
+└── README.md           # Project documentation and deployment guide
+📊 Operational Scenarios & Model FormulationsThe engine allows users to evaluate three strategic asset management paradigms:Scenario A (Deterministic Static Design): Baseline static capacity sizing based on peak population equivalent (PE) without operational flexibility.Scenario B (Stochastic Hydraulic Sizing): Sizing incorporating flow and BOD variance but operating under fixed-speed electromechanical controls.Scenario C (Integrated ROA & Lifecycle Optimization): Full continuous-time stochastic modeling with real-options-triggered technology retrofits (VFDs, high-efficiency blowers, and solar microgrids).🌐 Deployment PathwaysStreamlit Community Cloud (Free & Easy)Push your repository to GitHub.Sign in to share.streamlit.io.Connect your repository and specify app.py as the main file path.Deploy and share the public URL with stakeholders.Docker Containerization (Enterprise)To build and run the tool in a containerized environment:FROM python:3.10-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8501
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+📜 Citation & ReferencesIf you use this software or framework in your research or municipal projects, please cite:Hosdi, H. B. (2026a). "Stochastic cost modeling and real options analysis for municipal sewerage infrastructure development: Mitigating unforeseen budget overruns." J. Infrastruct. Syst.Hosdi, H. B. (2026b). "Stochastic hydraulic design and real options sizing of municipal sewerage systems: Balancing capital outlays, energy efficiency, and regulatory compliance." J. Water Resour. Plann. Manage.Hosdi, H. B. (2026c). "Stochastic Lifecycle Energy-Carbon Optimization and Real Options Sizing for Municipal Sewerage Systems: Balancing Operational Emissions and Capital Outlays."📄 LicenseThis project is licensed under the MIT License - see the LICENSE file for details.
